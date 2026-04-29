@@ -34,10 +34,12 @@ function renderDashboard() {
                 </div>
                 <nav class="sidebar-nav">
                     <a href="#" class="active" onclick="showSection('overview')"><i data-feather="home"></i> 대시보드 홈</a>
-                    <a href="#" onclick="showSection('hero')"><i data-feather="layout"></i> 히어로 섹션 관리</a>
+                    <a href="#" onclick="showSection('hero')"><i data-feather="layout"></i> 히어로 관리</a>
+                    <a href="#" onclick="showSection('director')"><i data-feather="user"></i> 원장님 소개 관리</a>
                     <a href="#" onclick="showSection('programs')"><i data-feather="grid"></i> 프로그램 관리</a>
                     <a href="#" onclick="showSection('cases')"><i data-feather="image"></i> 임상 사례 (B/A)</a>
-                    <a href="#" onclick="showSection('blog')"><i data-feather="file-text"></i> 블로그/소식</a>
+                    <a href="#" onclick="showSection('gallery')"><i data-feather="camera"></i> 갤러리 관리</a>
+                    <a href="#" onclick="showSection('footer')"><i data-feather="info"></i> 하단 정보 관리</a>
                     <a href="#" onclick="logout()"><i data-feather="log-out"></i> 로그아웃</a>
                 </nav>
             </aside>
@@ -206,6 +208,119 @@ function showSection(section) {
             saveClinicData(updatedData);
             alert('히어로 섹션이 업데이트되었습니다.');
         });
+    } else if (section === 'director') {
+        title.innerText = '원장님 소개 관리';
+        content.innerHTML = `
+            <div class="admin-card">
+                <h2>원장님 정보 수정</h2>
+                <form id="edit-director-form" class="admin-form">
+                    <div class="form-group">
+                        <label>성함</label>
+                        <input type="text" id="dir-name" value="${data.director.name}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>직함</label>
+                        <input type="text" id="dir-title" value="${data.director.title}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>인사말 / 철학</label>
+                        <textarea id="dir-phil" rows="5" required>${data.director.philosophy}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>프로필 사진</label>
+                        <input type="file" id="dir-img-file" accept="image/*" onchange="previewImage(this, 'dir-img-preview')">
+                        <div class="image-preview-container">
+                            <img id="dir-img-preview" src="${data.director.profileImg}" alt="Preview" style="max-width: 150px; margin-top: 10px; border-radius: 8px;">
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">정보 저장</button>
+                    </div>
+                </form>
+            </div>
+        `;
+        
+        document.getElementById('edit-director-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const updatedData = getClinicData();
+            const fileInput = document.getElementById('dir-img-file');
+            let profileImg = updatedData.director.profileImg;
+            
+            if (fileInput.files.length > 0) {
+                profileImg = await toBase64(fileInput.files[0]);
+            }
+
+            updatedData.director = {
+                ...updatedData.director,
+                name: document.getElementById('dir-name').value,
+                title: document.getElementById('dir-title').value,
+                philosophy: document.getElementById('dir-phil').value,
+                profileImg: profileImg
+            };
+            saveClinicData(updatedData);
+            alert('원장님 정보가 업데이트되었습니다.');
+        });
+    } else if (section === 'gallery') {
+        title.innerText = '갤러리 관리';
+        let html = `
+            <div class="admin-card">
+                <div class="card-header">
+                    <h2>갤러리 사진</h2>
+                    <input type="file" id="add-gallery-file" accept="image/*" style="display:none" onchange="uploadToGallery(this)">
+                    <button class="btn-action" onclick="document.getElementById('add-gallery-file').click()">+ 사진 추가</button>
+                </div>
+                <div class="gallery-admin-grid">
+        `;
+        
+        data.gallery.forEach(g => {
+            html += `
+                <div class="admin-gallery-card">
+                    <img src="${g.img}" alt="Gallery">
+                    <button class="btn-delete-small" onclick="deleteGalleryItem(${g.id})">&times;</button>
+                </div>
+            `;
+        });
+        
+        html += `</div></div>`;
+        content.innerHTML = html;
+        updateGalleryStyles();
+    } else if (section === 'footer') {
+        title.innerText = '하단 정보 관리';
+        content.innerHTML = `
+            <div class="admin-card">
+                <h2>푸터 정보 수정</h2>
+                <form id="edit-footer-form" class="admin-form">
+                    <div class="form-group">
+                        <label>주소</label>
+                        <input type="text" id="footer-addr" value="${data.footer.address}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>연락처</label>
+                        <input type="text" id="footer-phone" value="${data.footer.phone}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>영업시간</label>
+                        <input type="text" id="footer-hours" value="${data.footer.hours}" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">정보 저장</button>
+                    </div>
+                </form>
+            </div>
+        `;
+        
+        document.getElementById('edit-footer-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const updatedData = getClinicData();
+            updatedData.footer = {
+                ...updatedData.footer,
+                address: document.getElementById('footer-addr').value,
+                phone: document.getElementById('footer-phone').value,
+                hours: document.getElementById('footer-hours').value
+            };
+            saveClinicData(updatedData);
+            alert('푸터 정보가 업데이트되었습니다.');
+        });
     } else if (section === 'cases') {
         title.innerText = '임상 사례 (B/A) 관리';
         let html = `
@@ -323,6 +438,84 @@ function editProgram(id) {
         alert('저장되었습니다.');
         showSection('programs');
     });
+}
+
+function addCase() {
+    const content = document.getElementById('dashboard-content');
+    content.innerHTML = `
+        <div class="admin-card">
+            <h2>새 임상 사례 추가</h2>
+            <form id="add-case-form" class="admin-form">
+                <div class="form-group">
+                    <label>사례 제목</label>
+                    <input type="text" id="case-title" placeholder="예: 거북목 교정 10회차" required>
+                </div>
+                <div class="form-group">
+                    <label>Before 이미지</label>
+                    <input type="file" id="case-before-file" accept="image/*" required>
+                </div>
+                <div class="form-group">
+                    <label>After 이미지</label>
+                    <input type="file" id="case-after-file" accept="image/*" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="showSection('cases')">취소</button>
+                    <button type="submit" class="btn-primary">사례 등록</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.getElementById('add-case-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = getClinicData();
+        const beforeImg = await toBase64(document.getElementById('case-before-file').files[0]);
+        const afterImg = await toBase64(document.getElementById('case-after-file').files[0]);
+        
+        data.cases.push({
+            id: Date.now(),
+            title: document.getElementById('case-title').value,
+            before: beforeImg,
+            after: afterImg
+        });
+        
+        saveClinicData(data);
+        alert('새 사례가 등록되었습니다.');
+        showSection('cases');
+    });
+}
+
+async function uploadToGallery(input) {
+    if (input.files && input.files[0]) {
+        const data = getClinicData();
+        const imgBase64 = await toBase64(input.files[0]);
+        data.gallery.push({
+            id: Date.now(),
+            img: imgBase64
+        });
+        saveClinicData(data);
+        showSection('gallery');
+    }
+}
+
+function deleteGalleryItem(id) {
+    if (!confirm('사진을 삭제하시겠습니까?')) return;
+    const data = getClinicData();
+    data.gallery = data.gallery.filter(g => g.id !== id);
+    saveClinicData(data);
+    showSection('gallery');
+}
+
+function updateGalleryStyles() {
+    const style = document.createElement('style');
+    style.innerHTML = `
+        .gallery-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+        .admin-gallery-card { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid #eee; }
+        .admin-gallery-card img { width: 100%; height: 100%; object-fit: cover; }
+        .btn-delete-small { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .btn-delete-small:hover { background: #ff4757; }
+    `;
+    document.head.appendChild(style);
 }
 
 function toBase64(file) {
