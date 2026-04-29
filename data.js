@@ -44,7 +44,21 @@ const DEFAULT_DATA = {
 
 function getClinicData() {
     const saved = localStorage.getItem('clinicData');
-    return saved ? JSON.parse(saved) : DEFAULT_DATA;
+    if (!saved) return DEFAULT_DATA;
+    
+    try {
+        const parsed = JSON.parse(saved);
+        // Merge saved data with default structure to ensure new fields (director, gallery, etc.) exist
+        return {
+            ...DEFAULT_DATA,
+            ...parsed,
+            hero: { ...DEFAULT_DATA.hero, ...parsed.hero },
+            director: { ...DEFAULT_DATA.director, ...(parsed.director || {}) },
+            footer: { ...DEFAULT_DATA.footer, ...(parsed.footer || {}) }
+        };
+    } catch (e) {
+        return DEFAULT_DATA;
+    }
 }
 
 function saveClinicData(data) {
