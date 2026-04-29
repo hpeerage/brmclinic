@@ -436,9 +436,6 @@ function addProgram() {
     });
 }
 
-    });
-}
-
 function deleteProgram(id) {
     if (!confirm('정말 이 프로그램을 삭제하시겠습니까?')) return;
     const data = getClinicData();
@@ -553,9 +550,6 @@ function addCase() {
         saveClinicData(data);
         alert('새 사례가 등록되었습니다.');
         showSection('cases');
-    });
-}
-
     });
 }
 
