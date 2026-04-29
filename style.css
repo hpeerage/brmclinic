@@ -788,7 +788,7 @@ h1 {
 }
 
 .partner-logo {
-    height: 30px;
+    height: 45px;
     opacity: 0.4;
     filter: grayscale(1) invert(1);
     transition: 0.3s;
