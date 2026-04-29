@@ -15,15 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Header Scroll Effect
     const header = document.getElementById('header');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            header.style.padding = '10px 0';
-            header.style.background = 'rgba(255, 255, 255, 0.9)';
-        } else {
-            header.style.padding = '20px 0';
-            header.style.background = 'rgba(255, 255, 255, 0.7)';
-        }
-    });
+    if (header) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.style.padding = '10px 0';
+                header.style.background = 'rgba(255, 255, 255, 0.9)';
+            } else {
+                header.style.padding = '20px 0';
+                header.style.background = 'rgba(255, 255, 255, 0.7)';
+            }
+        });
+    }
 
     // 1. Dynamic Content Rendering
     const data = getClinicData();
@@ -32,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const heroTitle = document.querySelector('.hero-content h1');
     const heroSubtitle = document.querySelector('.hero-content p');
     const heroSection = document.getElementById('home');
-    if (heroTitle && data.hero) {
+    if (heroTitle && heroSection && data.hero) {
         heroTitle.innerText = data.hero.title;
         heroSubtitle.innerText = data.hero.subtitle;
         heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${data.hero.bgImg}')`;
