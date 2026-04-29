@@ -113,6 +113,8 @@ function updateAdminStyles() {
         .quick-actions h2 { font-size: 1.2rem; margin-bottom: 24px; }
         .btn-action { padding: 14px 28px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer; margin-right: 12px; font-weight: 600; transition: 0.3s; }
         .btn-action:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-delete-text { color: #ff4757; margin-left: 5px; }
+        .btn-delete-text:hover { background: #fff5f5; border-color: #ff4757; }
     `;
     document.head.appendChild(style);
 }
@@ -154,6 +156,7 @@ function showSection(section) {
                     <td class="td-desc">${prog.desc}</td>
                     <td>
                         <button class="btn-edit" onclick="editProgram(${prog.id})">수정</button>
+                        <button class="btn-edit btn-delete-text" onclick="deleteProgram(${prog.id})">삭제</button>
                     </td>
                 </tr>
             `;
@@ -341,7 +344,10 @@ function showSection(section) {
                     </div>
                     <div class="case-info">
                         <h3>${c.title}</h3>
-                        <button class="btn-edit" onclick="deleteCase(${c.id})">삭제</button>
+                        <div class="case-actions">
+                            <button class="btn-edit" onclick="editCase(${c.id})">수정</button>
+                            <button class="btn-edit btn-delete-text" onclick="deleteCase(${c.id})">삭제</button>
+                        </div>
                     </div>
                 </div>
             `;
@@ -374,6 +380,71 @@ function showSection(section) {
             </div>
         `;
     }
+}
+
+function addProgram() {
+    const content = document.getElementById('dashboard-content');
+    content.innerHTML = `
+        <div class="admin-card">
+            <h2>새 프로그램 추가</h2>
+            <form id="add-program-form" class="admin-form">
+                <div class="form-group">
+                    <label>프로그램 명</label>
+                    <input type="text" id="add-title" placeholder="예: 프리미엄 전신 케어" required>
+                </div>
+                <div class="form-group">
+                    <label>아이콘 (Feather Icon 이름)</label>
+                    <input type="text" id="add-icon" placeholder="예: star" required>
+                    <small style="color: #888;">feathericons.com 참고</small>
+                </div>
+                <div class="form-group">
+                    <label>설명</label>
+                    <textarea id="add-desc" rows="4" placeholder="프로그램 상세 설명을 입력하세요" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>프로그램 이미지</label>
+                    <input type="file" id="add-img-file" accept="image/*" required onchange="previewImage(this, 'add-img-preview')">
+                    <div class="image-preview-container">
+                        <img id="add-img-preview" src="" alt="Preview" style="max-width: 150px; margin-top: 10px; border-radius: 8px; display: none;">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="showSection('programs')">취소</button>
+                    <button type="submit" class="btn-primary">프로그램 등록</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.getElementById('add-program-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = getClinicData();
+        const fileInput = document.getElementById('add-img-file');
+        const imgBase64 = await toBase64(fileInput.files[0]);
+        
+        data.programs.push({
+            id: Date.now(),
+            title: document.getElementById('add-title').value,
+            icon: document.getElementById('add-icon').value,
+            desc: document.getElementById('add-desc').value,
+            img: imgBase64
+        });
+        
+        saveClinicData(data);
+        alert('새 프로그램이 등록되었습니다.');
+        showSection('programs');
+    });
+}
+
+    });
+}
+
+function deleteProgram(id) {
+    if (!confirm('정말 이 프로그램을 삭제하시겠습니까?')) return;
+    const data = getClinicData();
+    data.programs = data.programs.filter(p => p.id !== id);
+    saveClinicData(data);
+    showSection('programs');
 }
 
 function editProgram(id) {
@@ -485,6 +556,72 @@ function addCase() {
     });
 }
 
+    });
+}
+
+function editCase(id) {
+    const data = getClinicData();
+    const c = data.cases.find(x => x.id === id);
+    if (!c) return;
+
+    const content = document.getElementById('dashboard-content');
+    content.innerHTML = `
+        <div class="admin-card">
+            <h2>임상 사례 수정</h2>
+            <form id="edit-case-form" class="admin-form">
+                <div class="form-group">
+                    <label>사례 제목</label>
+                    <input type="text" id="edit-case-title" value="${c.title}" required>
+                </div>
+                <div class="form-group">
+                    <label>Before 이미지</label>
+                    <input type="file" id="edit-case-before-file" accept="image/*" onchange="previewImage(this, 'edit-before-preview')">
+                    <div class="image-preview-container">
+                        <img id="edit-before-preview" src="${c.before}" alt="Preview" style="max-width: 150px; margin-top: 10px; border-radius: 8px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>After 이미지</label>
+                    <input type="file" id="edit-case-after-file" accept="image/*" onchange="previewImage(this, 'edit-after-preview')">
+                    <div class="image-preview-container">
+                        <img id="edit-after-preview" src="${c.after}" alt="Preview" style="max-width: 150px; margin-top: 10px; border-radius: 8px;">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="showSection('cases')">취소</button>
+                    <button type="submit" class="btn-primary">저장하기</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.getElementById('edit-case-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const updatedData = getClinicData();
+        const index = updatedData.cases.findIndex(x => x.id === id);
+        
+        const beforeFile = document.getElementById('edit-case-before-file').files[0];
+        const afterFile = document.getElementById('edit-case-after-file').files[0];
+        
+        let beforeImg = updatedData.cases[index].before;
+        let afterImg = updatedData.cases[index].after;
+        
+        if (beforeFile) beforeImg = await toBase64(beforeFile);
+        if (afterFile) afterImg = await toBase64(afterFile);
+        
+        updatedData.cases[index] = {
+            ...updatedData.cases[index],
+            title: document.getElementById('edit-case-title').value,
+            before: beforeImg,
+            after: afterImg
+        };
+        
+        saveClinicData(updatedData);
+        alert('저장되었습니다.');
+        showSection('cases');
+    });
+}
+
 async function uploadToGallery(input) {
     if (input.files && input.files[0]) {
         const data = getClinicData();
@@ -531,7 +668,9 @@ function previewImage(input, previewId) {
     if (input.files && input.files[0]) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            document.getElementById(previewId).src = e.target.result;
+            const preview = document.getElementById(previewId);
+            preview.src = e.target.result;
+            preview.style.display = 'block';
         };
         reader.readAsDataURL(input.files[0]);
     }
