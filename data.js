@@ -1,5 +1,10 @@
 // Shared Data Management for Bareunmom Clinic
 const DEFAULT_DATA = {
+    hero: {
+        title: '바른몸을 향한 프리미엄 솔루션',
+        subtitle: '근본적인 원인을 찾아 바른 정렬과 균형을 되찾아 드립니다.',
+        bgImg: 'assets/hero.png'
+    },
     programs: [
         { id: 1, title: '페이스 왁싱', desc: '깔끔한 인상과 매끈한 피부 결을 위한 프리미엄 얼굴 왁싱 전문 관리입니다.', icon: 'star', img: 'assets/prog1.png' },
         { id: 2, title: '다이어트 프로그램', desc: '단순한 체중 감량을 넘어 개인별 체질에 맞춘 건강한 다이어트 솔루션을 제공합니다.', icon: 'activity', img: 'assets/prog2.png' },

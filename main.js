@@ -25,10 +25,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 3. Dynamic Program Rendering & Reveal Animation
+    // 1. Dynamic Hero & Program Rendering
+    const data = getClinicData();
+    const heroTitle = document.querySelector('.hero-content h1');
+    const heroSubtitle = document.querySelector('.hero-content p');
+    const heroSection = document.getElementById('home');
+    
+    if (heroTitle && data.hero) {
+        heroTitle.innerText = data.hero.title;
+        heroSubtitle.innerText = data.hero.subtitle;
+        heroSection.style.backgroundImage = `linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('${data.hero.bgImg}')`;
+    }
+
     const programGrid = document.querySelector('.program-grid');
     if (programGrid) {
-        const data = getClinicData();
         programGrid.innerHTML = data.programs.map(prog => `
             <div class="program-card reveal">
                 <div class="program-image" style="background-image: url('${prog.img}');"></div>

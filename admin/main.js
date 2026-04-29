@@ -34,6 +34,7 @@ function renderDashboard() {
                 </div>
                 <nav class="sidebar-nav">
                     <a href="#" class="active" onclick="showSection('overview')"><i data-feather="home"></i> 대시보드 홈</a>
+                    <a href="#" onclick="showSection('hero')"><i data-feather="layout"></i> 히어로 섹션 관리</a>
                     <a href="#" onclick="showSection('programs')"><i data-feather="grid"></i> 프로그램 관리</a>
                     <a href="#" onclick="showSection('cases')"><i data-feather="image"></i> 임상 사례 (B/A)</a>
                     <a href="#" onclick="showSection('blog')"><i data-feather="file-text"></i> 블로그/소식</a>
@@ -159,6 +160,42 @@ function showSection(section) {
         html += `</tbody></table></div>`;
         content.innerHTML = html;
         feather.replace();
+    } else if (section === 'hero') {
+        title.innerText = '히어로 섹션 관리';
+        content.innerHTML = `
+            <div class="admin-card">
+                <h2>히어로 콘텐츠 수정</h2>
+                <form id="edit-hero-form" class="admin-form">
+                    <div class="form-group">
+                        <label>메인 타이틀</label>
+                        <input type="text" id="hero-title" value="${data.hero.title}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>서브 타이틀</label>
+                        <textarea id="hero-subtitle" rows="3" required>${data.hero.subtitle}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>배경 이미지 URL</label>
+                        <input type="text" id="hero-bg" value="${data.hero.bgImg}" required>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">변경사항 저장</button>
+                    </div>
+                </form>
+            </div>
+        `;
+        
+        document.getElementById('edit-hero-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const updatedData = getClinicData();
+            updatedData.hero = {
+                title: document.getElementById('hero-title').value,
+                subtitle: document.getElementById('hero-subtitle').value,
+                bgImg: document.getElementById('hero-bg').value
+            };
+            saveClinicData(updatedData);
+            alert('히어로 섹션이 업데이트되었습니다.');
+        });
     } else if (section === 'cases') {
         title.innerText = '임상 사례 (B/A) 관리';
         let html = `
