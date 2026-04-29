@@ -109,6 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
         footerHours.innerHTML = `영업시간: ${data.footer.hours}`;
     }
 
+    // Partners
+    const partnersGrid = document.getElementById('footer-partners-grid');
+    if (partnersGrid && data.partners) {
+        partnersGrid.innerHTML = data.partners.map(p => `
+            <img src="${p.img}" alt="${p.name}" class="partner-logo">
+        `).join('');
+    }
+
     const observerOptions = {
         threshold: 0.15,
         rootMargin: '0px 0px -50px 0px'

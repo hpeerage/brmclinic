@@ -39,6 +39,7 @@ function renderDashboard() {
                     <a href="#" onclick="showSection('programs')"><i data-feather="grid"></i> 프로그램 관리</a>
                     <a href="#" onclick="showSection('cases')"><i data-feather="image"></i> 임상 사례 (B/A)</a>
                     <a href="#" onclick="showSection('gallery')"><i data-feather="camera"></i> 갤러리 관리</a>
+                    <a href="#" onclick="showSection('partners')"><i data-feather="briefcase"></i> 협력업체 관리</a>
                     <a href="#" onclick="showSection('footer')"><i data-feather="info"></i> 하단 정보 관리</a>
                     <a href="#" onclick="logout()"><i data-feather="log-out"></i> 로그아웃</a>
                 </nav>
@@ -324,6 +325,30 @@ function showSection(section) {
             saveClinicData(updatedData);
             alert('푸터 정보가 업데이트되었습니다.');
         });
+    } else if (section === 'partners') {
+        title.innerText = '협력업체 관리';
+        let html = `
+            <div class="admin-card">
+                <div class="card-header">
+                    <h2>등록된 협력업체</h2>
+                    <button class="btn-action" onclick="addPartner()">+ 새 업체 추가</button>
+                </div>
+                <div class="gallery-admin-grid">
+        `;
+        
+        data.partners.forEach(p => {
+            html += `
+                <div class="admin-gallery-card">
+                    <img src="${p.img}" alt="${p.name}">
+                    <div style="padding: 10px; background: white; text-align: center; font-size: 0.8rem;">${p.name}</div>
+                    <button class="btn-delete-small" onclick="deletePartner(${p.id})">&times;</button>
+                </div>
+            `;
+        });
+        
+        html += `</div></div>`;
+        content.innerHTML = html;
+        updateGalleryStyles();
     } else if (section === 'cases') {
         title.innerText = '임상 사례 (B/A) 관리';
         let html = `
@@ -689,6 +714,56 @@ function updateCaseStyles() {
         .case-info h3 { font-size: 1rem; }
     `;
     document.head.appendChild(style);
+}
+
+function addPartner() {
+    const content = document.getElementById('dashboard-content');
+    content.innerHTML = `
+        <div class="admin-card">
+            <h2>새 협력업체 추가</h2>
+            <form id="add-partner-form" class="admin-form">
+                <div class="form-group">
+                    <label>업체명</label>
+                    <input type="text" id="partner-name" placeholder="예: 국민은행" required>
+                </div>
+                <div class="form-group">
+                    <label>로고 이미지</label>
+                    <input type="file" id="partner-img-file" accept="image/*" required onchange="previewImage(this, 'partner-preview')">
+                    <div class="image-preview-container">
+                        <img id="partner-preview" src="" alt="Preview" style="max-width: 150px; margin-top: 10px; border-radius: 8px; display: none;">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="showSection('partners')">취소</button>
+                    <button type="submit" class="btn-primary">업체 등록</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.getElementById('add-partner-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = getClinicData();
+        const imgBase64 = await toBase64(document.getElementById('partner-img-file').files[0]);
+        
+        data.partners.push({
+            id: Date.now(),
+            name: document.getElementById('partner-name').value,
+            img: imgBase64
+        });
+        
+        saveClinicData(data);
+        alert('새 협력업체가 등록되었습니다.');
+        showSection('partners');
+    });
+}
+
+function deletePartner(id) {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    const data = getClinicData();
+    data.partners = data.partners.filter(p => p.id !== id);
+    saveClinicData(data);
+    showSection('partners');
 }
 
 function logout() {

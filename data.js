@@ -39,7 +39,10 @@ const DEFAULT_DATA = {
             instagram: 'https://instagram.com/brmclinic',
             naver: 'https://blog.naver.com/brmclinic'
         }
-    }
+    },
+    partners: [
+        { id: 1, name: 'Partner 1', img: 'assets/logo.svg' }
+    ]
 };
 
 function getClinicData() {
@@ -54,7 +57,8 @@ function getClinicData() {
             ...parsed,
             hero: { ...DEFAULT_DATA.hero, ...parsed.hero },
             director: { ...DEFAULT_DATA.director, ...(parsed.director || {}) },
-            footer: { ...DEFAULT_DATA.footer, ...(parsed.footer || {}) }
+            footer: { ...DEFAULT_DATA.footer, ...(parsed.footer || {}) },
+            partners: parsed.partners || DEFAULT_DATA.partners
         };
     } catch (e) {
         return DEFAULT_DATA;
