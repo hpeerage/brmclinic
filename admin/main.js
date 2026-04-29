@@ -175,8 +175,11 @@ function showSection(section) {
                         <textarea id="hero-subtitle" rows="3" required>${data.hero.subtitle}</textarea>
                     </div>
                     <div class="form-group">
-                        <label>배경 이미지 URL</label>
-                        <input type="text" id="hero-bg" value="${data.hero.bgImg}" required>
+                        <label>배경 이미지</label>
+                        <input type="file" id="hero-bg-file" accept="image/*" onchange="previewImage(this, 'hero-bg-preview')">
+                        <div class="image-preview-container">
+                            <img id="hero-bg-preview" src="${data.hero.bgImg}" alt="Preview" style="max-width: 200px; margin-top: 10px; border-radius: 8px;">
+                        </div>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">변경사항 저장</button>
@@ -185,13 +188,20 @@ function showSection(section) {
             </div>
         `;
         
-        document.getElementById('edit-hero-form').addEventListener('submit', (e) => {
+        document.getElementById('edit-hero-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const updatedData = getClinicData();
+            const fileInput = document.getElementById('hero-bg-file');
+            let bgImg = updatedData.hero.bgImg;
+            
+            if (fileInput.files.length > 0) {
+                bgImg = await toBase64(fileInput.files[0]);
+            }
+
             updatedData.hero = {
                 title: document.getElementById('hero-title').value,
                 subtitle: document.getElementById('hero-subtitle').value,
-                bgImg: document.getElementById('hero-bg').value
+                bgImg: bgImg
             };
             saveClinicData(updatedData);
             alert('히어로 섹션이 업데이트되었습니다.');
@@ -275,6 +285,13 @@ function editProgram(id) {
                     <label>설명</label>
                     <textarea id="edit-desc" rows="4" required>${prog.desc}</textarea>
                 </div>
+                <div class="form-group">
+                    <label>프로그램 이미지</label>
+                    <input type="file" id="edit-img-file" accept="image/*" onchange="previewImage(this, 'edit-img-preview')">
+                    <div class="image-preview-container">
+                        <img id="edit-img-preview" src="${prog.img}" alt="Preview" style="max-width: 150px; margin-top: 10px; border-radius: 8px;">
+                    </div>
+                </div>
                 <div class="form-actions">
                     <button type="button" class="btn-secondary" onclick="showSection('programs')">취소</button>
                     <button type="submit" class="btn-primary">저장하기</button>
@@ -283,22 +300,48 @@ function editProgram(id) {
         </div>
     `;
 
-    document.getElementById('edit-program-form').addEventListener('submit', (e) => {
+    document.getElementById('edit-program-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const updatedData = getClinicData();
         const index = updatedData.programs.findIndex(p => p.id === id);
+        const fileInput = document.getElementById('edit-img-file');
+        let img = updatedData.programs[index].img;
+
+        if (fileInput.files.length > 0) {
+            img = await toBase64(fileInput.files[0]);
+        }
         
         updatedData.programs[index] = {
             ...updatedData.programs[index],
             title: document.getElementById('edit-title').value,
             icon: document.getElementById('edit-icon').value,
-            desc: document.getElementById('edit-desc').value
+            desc: document.getElementById('edit-desc').value,
+            img: img
         };
         
         saveClinicData(updatedData);
         alert('저장되었습니다.');
         showSection('programs');
     });
+}
+
+function toBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+function previewImage(input, previewId) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById(previewId).src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
 }
 
 function deleteCase(id) {
