@@ -95,9 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const galleryGrid = document.querySelector('.gallery-grid');
     if (galleryGrid && data.gallery) {
         galleryGrid.innerHTML = data.gallery.map(g => `
-            <div class="gallery-item reveal">
-                <img src="${g.img}" alt="Gallery">
-            </div>
+            <div class="gallery-item reveal" style="background-image: url('${g.img}');"></div>
         `).join('');
     }
 
