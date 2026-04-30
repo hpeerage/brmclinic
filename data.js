@@ -66,5 +66,13 @@ function getClinicData() {
 }
 
 function saveClinicData(data) {
-    localStorage.setItem('clinicData', JSON.stringify(data));
+    try {
+        localStorage.setItem('clinicData', JSON.stringify(data));
+    } catch (e) {
+        if (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED') {
+            alert('저장 용량이 초과되었습니다! 사진 개수를 줄이거나 더 작은 크기의 사진을 업로드해 주세요.');
+        } else {
+            console.error('Error saving data:', e);
+        }
+    }
 }
