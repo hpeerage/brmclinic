@@ -93,10 +93,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Gallery
     const galleryGrid = document.querySelector('.gallery-grid');
+    const modal = document.getElementById('gallery-modal');
+    const modalImg = document.getElementById('modal-img');
+    const closeBtn = document.querySelector('.modal-close');
+
     if (galleryGrid && data.gallery) {
         galleryGrid.innerHTML = data.gallery.map(g => `
-            <div class="gallery-item reveal" style="background-image: url('${g.img}');"></div>
+            <div class="gallery-item reveal" style="background-image: url('${g.img}');" onclick="openGalleryModal('${g.img}')"></div>
         `).join('');
+    }
+
+    window.openGalleryModal = (imgSrc) => {
+        if (modal && modalImg) {
+            modal.style.display = 'block';
+            modalImg.src = imgSrc;
+            document.body.style.overflow = 'hidden'; // Prevent scroll
+        }
+    };
+
+    if (closeBtn) {
+        closeBtn.onclick = () => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+    }
+
+    if (modal) {
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        };
     }
 
     // Footer
