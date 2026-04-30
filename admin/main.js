@@ -280,7 +280,11 @@ function showSection(section) {
             html += `
                 <div class="admin-gallery-card">
                     <img src="${g.img}" alt="Gallery">
-                    <button class="btn-delete-small" onclick="deleteGalleryItem(${g.id})">&times;</button>
+                    <div class="gallery-controls">
+                        <button class="btn-move" onclick="moveGalleryItem(${g.id}, -1)">&larr;</button>
+                        <button class="btn-delete-small" onclick="deleteGalleryItem(${g.id})">&times;</button>
+                        <button class="btn-move" onclick="moveGalleryItem(${g.id}, 1)">&rarr;</button>
+                    </div>
                 </div>
             `;
         });
@@ -662,14 +666,34 @@ function deleteGalleryItem(id) {
     showSection('gallery');
 }
 
+function moveGalleryItem(id, direction) {
+    const data = getClinicData();
+    const index = data.gallery.findIndex(g => g.id === id);
+    if (index === -1) return;
+    
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= data.gallery.length) return;
+    
+    // Swap
+    const temp = data.gallery[index];
+    data.gallery[index] = data.gallery[newIndex];
+    data.gallery[newIndex] = temp;
+    
+    saveClinicData(data);
+    showSection('gallery');
+}
+
 function updateGalleryStyles() {
     const style = document.createElement('style');
     style.innerHTML = `
         .gallery-admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
-        .admin-gallery-card { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid #eee; }
+        .admin-gallery-card { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid #eee; background: #fff; }
         .admin-gallery-card img { width: 100%; height: 100%; object-fit: cover; }
-        .btn-delete-small { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-        .btn-delete-small:hover { background: #ff4757; }
+        .gallery-controls { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.6); display: flex; justify-content: space-between; padding: 5px; opacity: 0; transition: 0.3s; }
+        .admin-gallery-card:hover .gallery-controls { opacity: 1; }
+        .btn-move { background: none; border: none; color: white; cursor: pointer; padding: 5px; font-size: 1.2rem; }
+        .btn-move:hover { color: var(--primary); }
+        .btn-delete-small { background: #ff4757; color: white; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
     `;
     document.head.appendChild(style);
 }
